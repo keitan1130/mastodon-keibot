@@ -85,8 +85,8 @@ class PromptProcessor:
                 for thread_status in existing_data["thread_data"]:
                     acct = thread_status["account"]
                     content = thread_status["content"]
-                    # カスタムプロンプト部分を除去
-                    content = re.sub(r'/\*[^*]+\*/', '', content).strip()
+                    # カスタムプロンプト部分を除去（複数行対応）
+                    content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL).strip()
                     if content:
                         conversation_parts.append(f"{acct}: {content}")
 
@@ -96,9 +96,9 @@ class PromptProcessor:
                 acct = status['account']['acct'] if isinstance(status, dict) else status.account.acct
                 content = strip_html(status.get('content', '') if isinstance(status, dict) else status.content)
 
-                # カスタムプロンプト部分を除去
+                # カスタムプロンプト部分を除去（複数行対応）
                 if custom_prompt and custom_prompt in content:
-                    content = re.sub(r'/\*[^*]+\*/', '', content).strip()
+                    content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL).strip()
                 if content:
                     conversation_parts.append(f"{acct}: {content}")
 

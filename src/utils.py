@@ -10,8 +10,17 @@ def strip_html(html: str) -> str:
 
 
 def extract_custom_prompt(text: str) -> str | None:
-    """テキストから /*ここにプロンプト*/ 形式のカスタムプロンプトを抽出"""
-    match = re.search(r'/\*([^*]+)\*/', text)
+    """
+    テキストから /*ここにプロンプト*/ 形式のカスタムプロンプトを抽出
+
+    複数行にも対応:
+    /*
+    あ
+    あ
+    */
+    """
+    # re.DOTALL で . が改行にもマッチ、.*? で最短マッチ
+    match = re.search(r'/\*(.*?)\*/', text, re.DOTALL)
     if match:
         return match.group(1).strip()
     return None

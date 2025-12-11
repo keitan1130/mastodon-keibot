@@ -72,9 +72,9 @@ def show_conversation(conversation_id: int):
 def main():
     if len(sys.argv) < 2:
         print("使用方法:")
-        print("  python view_data.py list              - 全会話の一覧")
-        print("  python view_data.py show <会話ID>    - 特定の会話の詳細")
-        print("  python view_data.py latest            - 最新の会話の詳細")
+        print("  python3 view_data.py list              - 全会話の一覧")
+        print("  python3 view_data.py show <会話ID>    - 特定の会話の詳細")
+        print("  python3 view_data.py latest            - 最新の会話の詳細")
         sys.exit(1)
 
     command = sys.argv[1]
