@@ -1,84 +1,91 @@
-"""LLM（Gemini）との通信インターフェース"""
-import os
-import subprocess
+"""LLM（Ollama）との通信インターフェース"""
 import logging
 from typing import Optional
 
-from .config import GEMINI_MD_PATH
+try:
+    import ollama
+except ImportError:
+    ollama = None
+
+from .config import OLLAMA_MODEL
 from .utils import remove_markdown
 
 
-class GeminiInterface:
-    """Gemini CLIとの通信を担当"""
+class OllamaInterface:
+    """Ollamaとの通信を担当"""
 
-    def __init__(self, model: str = "gemini-2.5-flash"):
-        self.model = model
-        self.gemini_md_path = GEMINI_MD_PATH
+    def __init__(self, model: str = None):
+        self.model = model or OLLAMA_MODEL
+        self._system_prompt: Optional[str] = None
+
+        if ollama is None:
+            logging.error("ollama package not installed. Run: pip install ollama")
 
     def update_system_prompt(self, system_prompt: str) -> bool:
-        """GEMINI.mdを更新してシステムプロンプトを設定"""
-        try:
-            # ディレクトリが存在しない場合は作成
-            os.makedirs(os.path.dirname(self.gemini_md_path), exist_ok=True)
-
-            with open(self.gemini_md_path, 'w', encoding='utf-8') as f:
-                f.write(system_prompt)
-            logging.info(f'Updated GEMINI.md ({len(system_prompt)} chars)')
-            return True
-        except Exception as e:
-            logging.error(f'Failed to update GEMINI.md: {e}')
-            return False
+        """システムプロンプトを設定"""
+        self._system_prompt = system_prompt
+        logging.info(f'Updated system prompt ({len(system_prompt)} chars)')
+        return True
 
     def read_system_prompt(self) -> Optional[str]:
-        """現在のGEMINI.mdの内容を読み込み"""
-        try:
-            with open(self.gemini_md_path, 'r', encoding='utf-8') as f:
-                return f.read()
-        except FileNotFoundError:
-            return None
-        except Exception as e:
-            logging.error(f'Failed to read GEMINI.md: {e}')
-            return None
+        """現在のシステムプロンプトを取得"""
+        return self._system_prompt
 
-    def generate(self, prompt: str) -> str:
-        """Geminiでテキストを生成"""
+    def generate(self, user_prompt: str) -> str:
+        """Ollamaでテキストを生成"""
+        if ollama is None:
+            return 'Error: ollama package not installed.'
+
         try:
-            result = subprocess.run(
-                ['gemini', '-m', self.model, '-p', prompt],
-                capture_output=True,
-                text=True,
-                check=True,
-                timeout=120  # 2分のタイムアウト
+            # メッセージを構築
+            messages = []
+
+            # システムプロンプトがあれば追加
+            if self._system_prompt:
+                messages.append({
+                    "role": "system",
+                    "content": self._system_prompt
+                })
+
+            # ユーザーメッセージを追加
+            messages.append({
+                "role": "user",
+                "content": user_prompt
+            })
+
+            logging.info(f"Sending to Ollama ({self.model}): {len(messages)} messages")
+
+            # Ollamaでチャット
+            response = ollama.chat(
+                model=self.model,
+                messages=messages
             )
-            response = result.stdout.strip()
-            logging.info(f"Gemini response received ({len(response)} chars)")
-            return response
-        except subprocess.TimeoutExpired:
-            logging.error('Gemini call timed out')
-            return 'Error: response generation timed out.'
-        except subprocess.CalledProcessError as e:
-            logging.error(f'Gemini call failed: {e.stderr}')
-            return 'Error: failed to generate response.'
-        except FileNotFoundError:
-            logging.error('Gemini CLI not found. Please ensure gemini is installed.')
-            return 'Error: gemini CLI not found.'
-        except Exception as e:
-            logging.error(f'Unexpected error calling Gemini: {e}')
-            return 'Error: unexpected error occurred.'
 
-    def generate_clean(self, prompt: str) -> str:
-        """Geminiでテキストを生成し、Markdownを除去"""
-        response = self.generate(prompt)
+            # レスポンスからテキストを取得
+            content = response['message']['content']
+            logging.info(f"Ollama response received ({len(content)} chars)")
+            return content
+
+        except ollama.ResponseError as e:
+            logging.error(f'Ollama response error: {e}')
+            return 'Error: Ollama response error.'
+        except Exception as e:
+            logging.error(f'Unexpected error calling Ollama: {e}')
+            return f'Error: {str(e)}'
+
+    def generate_clean(self, user_prompt: str) -> str:
+        """Ollamaでテキストを生成し、Markdownを除去"""
+        response = self.generate(user_prompt)
         return remove_markdown(response)
 
 
 # シングルトンインスタンス
-_gemini: Optional[GeminiInterface] = None
+_llm: Optional[OllamaInterface] = None
 
 
-def get_gemini() -> GeminiInterface:
-    """Geminiインターフェースのシングルトンインスタンスを取得"""
-    global _gemini
-    if _gemini is None:
-        _gemini = GeminiInterface()
-    return _gemini
+def get_llm() -> OllamaInterface:
+    """LLMインターフェースのシングルトンインスタンスを取得"""
+    global _llm
+    if _llm is None:
+        _llm = OllamaInterface()
+    return _llm

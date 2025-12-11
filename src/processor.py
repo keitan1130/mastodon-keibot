@@ -62,7 +62,7 @@ class PromptProcessor:
         custom_prompt: Optional[str] = None
     ) -> str:
         """
-        Gemini用の会話プロンプトを構築
+        LLM用の会話プロンプトを構築
 
         Args:
             thread_data: 現在のスレッドデータ

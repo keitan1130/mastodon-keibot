@@ -33,7 +33,9 @@ DATA_DIR = os.environ.get(
     'KEIBOT_DATA_DIR',
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
 )
-GEMINI_MD_PATH = os.path.expanduser('~/.gemini/GEMINI.md')
+
+# Ollama設定
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'gemma3:12b')
 
 # Default character prompt
 DEFAULT_CHARACTER_PROMPT = """以下の条件に従って、疑似的な感情をもつチャットボットとしてロールプレイをします。

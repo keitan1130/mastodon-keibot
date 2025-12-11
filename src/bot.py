@@ -6,7 +6,7 @@ from .config import API_BASE_URL, ACCESS_TOKEN
 from .utils import strip_html, snowflake_gen
 from .fetcher import get_full_thread
 from .processor import get_processor
-from .llm_interface import get_gemini
+from .llm_interface import get_llm
 from .poster import MastodonPoster
 from .storage import get_storage
 
@@ -19,7 +19,7 @@ class MentionBot(StreamListener):
         self.client = client
         self.poster = MastodonPoster(client)
         self.processor = get_processor()
-        self.gemini = get_gemini()
+        self.llm = get_llm()
         self.storage = get_storage()
 
     def on_notification(self, notification):
@@ -57,20 +57,20 @@ class MentionBot(StreamListener):
 
         # システムプロンプトを更新
         system_prompt = self.processor.build_system_prompt(active_prompt)
-        self.gemini.update_system_prompt(system_prompt)
+        self.llm.update_system_prompt(system_prompt)
 
         # メンション投稿にお気に入りをつける
         self.poster.favourite_status(status.id)
 
         # 会話プロンプトを構築
-        gemini_prompt = self.processor.build_conversation_prompt(
+        llm_prompt = self.processor.build_conversation_prompt(
             convo,
             conversation_id,
             new_custom_prompt
         )
 
         # AIレスポンスを生成
-        response = self.gemini.generate(gemini_prompt)
+        response = self.llm.generate(llm_prompt)
         logging.info(f"AI response: {response[:50]}...")
 
         # Markdownを除去してクリーンな応答を取得
@@ -85,7 +85,7 @@ class MentionBot(StreamListener):
         )
 
         # 投稿後のデータを更新
-        current_gemini_content = self.gemini.read_system_prompt() or active_prompt
+        current_llm_content = self.llm.read_system_prompt() or active_prompt
 
         # ボットの返信IDを記録
         bot_reply_ids = {str(s['id']) for s in posted_replies} if posted_replies else set()
@@ -101,7 +101,7 @@ class MentionBot(StreamListener):
             conversation_id=conversation_id,
             mention_status=status,
             thread_data=updated_convo,
-            ai_prompt=current_gemini_content,
+            ai_prompt=current_llm_content,
             ai_response=response,
             custom_prompt=new_custom_prompt if new_custom_prompt else existing_custom_prompt,
             bot_reply_ids=bot_reply_ids

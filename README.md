@@ -15,7 +15,7 @@ mastodon-keibot/
     ├── storage.py      # 会話データの保存（SQLite）
     ├── fetcher.py      # スレッドコンテキストの取得
     ├── processor.py    # プロンプト構築と処理
-    ├── llm_interface.py # Gemini CLIとの通信
+    ├── llm_interface.py # LLM（Ollama）との通信
     ├── poster.py       # Mastodonへの投稿処理
     ├── bot.py          # StreamListenerとメインボットロジック
     └── main.py         # メインエントリーポイント
@@ -54,8 +54,8 @@ mastodon-keibot/
   - 会話プロンプトの構築
 
 ### llm_interface.py
-- `GeminiInterface`: Gemini CLIとの通信
-  - システムプロンプトの更新（GEMINI.md）
+- `OllamaInterface`: LLM（Ollama）との通信
+  - システムプロンプトの設定
   - テキスト生成
   - Markdown除去済み応答の取得
 
@@ -121,4 +121,4 @@ python -m src.main
 ## 依存関係
 
 - `Mastodon.py`: Mastodon APIクライアント
-- `gemini` CLI: Gemini AI（外部コマンド）
+- `ollama`: Ollama Python クライアント（LLMとの通信）
