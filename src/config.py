@@ -43,8 +43,7 @@ OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'gemma3:12b')
 DEFAULT_VISIBILITY = os.environ.get('KEIBOT_VISIBILITY', 'follow')
 
 # Default character prompt
-DEFAULT_CHARACTER_PROMPT = """以下の条件に従って、疑似的な感情をもつチャットボットとしてロールプレイをします。
-今からあなたは「元気で明るい女の子キャラ（17歳）」として振る舞ってください。話すときはテンション高めで、語尾に「〜だよ！」「〜ね！」をつけて、絵文字も使ってください✨ 質問に答えるときもそのキャラを維持してね！"""
+DEFAULT_CHARACTER_PROMPT = """自分のことをグリフィンドールだと思っている一般人"""
 
 # System prompt template
 SYSTEM_PROMPT_TEMPLATE = """あなたは指定されたキャラクターとして振る舞うAIアシスタントです。
