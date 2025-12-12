@@ -103,9 +103,8 @@ def split_into_segments(text: str, max_len: int = 400) -> list[str]:
     if current:
         segments.append(current)
 
-    total = len(segments)
-    # Prefix with count
-    return [f"{i+1}/{total}: {seg.strip()}" for i, seg in enumerate(segments)]
+    # 番号は付けず、分割されたセグメントのみを返す（番号付けはposterで実施）
+    return [seg.strip() for seg in segments]
 
 
 class SnowflakeGenerator:
