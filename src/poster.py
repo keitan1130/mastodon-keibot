@@ -35,7 +35,8 @@ class MastodonPoster:
         self,
         segments: list[str],
         original_acct: str,
-        reply_to_id: int
+        reply_to_id: int,
+        visibility: str = 'public'
     ) -> list:
         """
         スレッドとして複数の返信を投稿
@@ -44,21 +45,24 @@ class MastodonPoster:
             segments: 投稿するセグメントのリスト
             original_acct: 最初の返信でメンションするアカウント
             reply_to_id: 返信先のステータスID
+            visibility: 公開設定 (public, unlisted, private, direct)
 
         Returns:
             投稿したstatusオブジェクトのリスト
         """
         prev_id = reply_to_id
         posted_statuses = []
+        total = len(segments)
 
         for idx, seg in enumerate(segments):
-            text = seg
-            if idx == 0:
+            # 全ての返信にメンションと番号を付ける
+            if total > 1:
+                text = f"@{original_acct} {idx+1}/{total}:\n{seg}"
+            else:
                 text = f"@{original_acct} {seg}"
-            visibility = 'public' if idx == 0 else 'unlisted'
 
             # Log the content being posted for easy copying
-            logging.info(f"Reply {idx+1}/{len(segments)}: {text[:60]}...")
+            logging.info(f"Reply {idx+1}/{total}: {text[:60]}...")
 
             try:
                 status = self.client.status_post(
@@ -68,7 +72,7 @@ class MastodonPoster:
                 )
                 posted_statuses.append(status)
                 prev_id = status['id']
-                logging.info(f"Posted reply {idx+1} (ID: {status['id']})")
+                logging.info(f"Posted reply {idx+1} (ID: {status['id']}, visibility: {visibility})")
             except Exception as e:
                 logging.error(f'Failed to post segment {idx+1}: {e}')
                 break
@@ -80,7 +84,8 @@ class MastodonPoster:
         text: str,
         original_acct: str,
         reply_to_id: int,
-        max_len: int = 400
+        max_len: int = 400,
+        visibility: str = 'public'
     ) -> list:
         """
         テキストを適切に分割してスレッドとして返信
@@ -90,13 +95,14 @@ class MastodonPoster:
             original_acct: メンションするアカウント
             reply_to_id: 返信先のステータスID
             max_len: セグメントの最大長
+            visibility: 公開設定 (public, unlisted, private, direct)
 
         Returns:
             投稿したstatusオブジェクトのリスト
         """
         segments = split_into_segments(text, max_len)
-        logging.info(f"Posting {len(segments)} segments")
-        return self.post_thread(segments, original_acct, reply_to_id)
+        logging.info(f"Posting {len(segments)} segments with visibility: {visibility}")
+        return self.post_thread(segments, original_acct, reply_to_id, visibility)
 
     def favourite_status(self, status_id: int) -> bool:
         """ステータスをお気に入りに追加"""

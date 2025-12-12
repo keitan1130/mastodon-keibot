@@ -2,7 +2,7 @@
 import logging
 from mastodon import Mastodon, StreamListener
 
-from .config import API_BASE_URL, ACCESS_TOKEN
+from .config import API_BASE_URL, ACCESS_TOKEN, DEFAULT_VISIBILITY
 from .utils import strip_html, snowflake_gen
 from .fetcher import get_full_thread
 from .processor import get_processor
@@ -77,11 +77,15 @@ class MentionBot(StreamListener):
         from .utils import remove_markdown
         clean_response = remove_markdown(response)
 
+        # visibilityを決定
+        visibility = self._determine_visibility(status)
+
         # 返信を投稿
         posted_replies = self.poster.post_reply(
             clean_response,
             original_acct=author_acct,
-            reply_to_id=status.id
+            reply_to_id=status.id,
+            visibility=visibility
         )
 
         # 投稿後のデータを更新
@@ -106,6 +110,25 @@ class MentionBot(StreamListener):
             custom_prompt=new_custom_prompt if new_custom_prompt else existing_custom_prompt,
             bot_reply_ids=bot_reply_ids
         )
+
+    def _determine_visibility(self, status) -> str:
+        """
+        返信の公開設定を決定
+
+        Args:
+            status: 返信元のステータス
+
+        Returns:
+            visibility文字列 (public, unlisted, private, direct)
+        """
+        if DEFAULT_VISIBILITY == 'follow':
+            # 相手の投稿の公開設定に合わせる
+            original_visibility = status.visibility
+            logging.info(f"Following original visibility: {original_visibility}")
+            return original_visibility
+        else:
+            # 設定されたvisibilityを使用
+            return DEFAULT_VISIBILITY
 
     def on_stream_error(self, error):
         """ストリームエラーを処理"""

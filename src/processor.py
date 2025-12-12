@@ -8,6 +8,20 @@ from .config import DEFAULT_CHARACTER_PROMPT, SYSTEM_PROMPT_TEMPLATE
 from .storage import get_storage
 
 
+def clean_content_for_log(content: str) -> str:
+    """
+    会話ログ用にコンテンツをクリーンアップ
+
+    - ユーザー投稿: @mention 部分を除去
+    - ボット投稿: @user 1/2: 形式のプレフィックスを除去
+    """
+    # ボットの返信形式 "@user 1/2:" や "@user 1/1:" を除去
+    content = re.sub(r'^@\S+\s+\d+/\d+:\s*', '', content)
+    # 先頭の @mention を除去（複数対応）
+    content = re.sub(r'^(@\S+\s*)+', '', content)
+    return content.strip()
+
+
 class PromptProcessor:
     """プロンプトの処理と構築を担当"""
 
@@ -87,6 +101,8 @@ class PromptProcessor:
                     content = thread_status["content"]
                     # カスタムプロンプト部分を除去（複数行対応）
                     content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL).strip()
+                    # メンション部分を除去
+                    content = clean_content_for_log(content)
                     if content:
                         conversation_parts.append(f"{acct}: {content}")
 
@@ -99,6 +115,8 @@ class PromptProcessor:
                 # カスタムプロンプト部分を除去（複数行対応）
                 if custom_prompt and custom_prompt in content:
                     content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL).strip()
+                # メンション部分を除去
+                content = clean_content_for_log(content)
                 if content:
                     conversation_parts.append(f"{acct}: {content}")
 
