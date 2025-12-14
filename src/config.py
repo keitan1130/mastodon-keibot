@@ -35,7 +35,7 @@ DATA_DIR = os.environ.get(
 )
 
 # Ollama設定
-OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'gemma3:12b')
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'gemma3:27b')
 
 # 返信の公開設定
 # public: 公開, unlisted: 未収載, private: フォロワー限定, direct: ダイレクト
@@ -43,7 +43,7 @@ OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'gemma3:12b')
 DEFAULT_VISIBILITY = os.environ.get('KEIBOT_VISIBILITY', 'follow')
 
 # Default character prompt
-DEFAULT_CHARACTER_PROMPT = """自分のことをグリフィンドールだと思っている一般人"""
+DEFAULT_CHARACTER_PROMPT = """通常"""
 
 # System prompt template
 SYSTEM_PROMPT_TEMPLATE = """あなたは指定されたキャラクターとして振る舞うAIアシスタントです。

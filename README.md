@@ -2,6 +2,8 @@
 
 Mastodonのメンションに自動返信するAIボットです。
 
+**GitHub**: https://github.com/keitan1130/mastodon-keibot
+
 ## プロジェクト構造
 
 ```
@@ -27,7 +29,7 @@ mastodon-keibot/
 ### config.py
 - `.env` ファイルからの環境変数読み込み
 - API設定（Mastodon URL、アクセストークン）
-- Ollamaモデル設定（デフォルト: `gemma3:12b`）
+- Ollamaモデル設定（デフォルト: `gemma3:27b`）
 - 返信の公開設定（`KEIBOT_VISIBILITY`）
 - データディレクトリパス
 - デフォルトキャラクタープロンプト
@@ -85,9 +87,106 @@ mastodon-keibot/
 - 起動メッセージの投稿
 - ボットの起動とストリーム監視
 
-## 使用方法
+## 環境構築
 
-### 環境変数設定
+### 必要な環境
+
+- Python 3.9以上
+- Ollama（ローカルLLM）
+- Mastodonアカウントとアクセストークン
+
+### 手順1: リポジトリのクローン
+
+```bash
+git clone https://github.com/keitan1130/mastodon-keibot.git
+cd mastodon-keibot
+```
+
+### 手順2: Python仮想環境の作成
+
+```bash
+# 仮想環境を作成
+python -m venv .venv
+
+# 仮想環境を有効化
+# Linux/Mac の場合:
+source .venv/bin/activate
+
+# Windows の場合:
+# .venv\Scripts\activate
+```
+
+### 手順3: Pythonパッケージのインストール
+
+仮想環境が有効化されている状態で実行：
+
+```bash
+pip install Mastodon.py ollama
+```
+
+### 手順4: Ollamaのインストール
+
+Ollamaをインストールしていない場合は、[公式サイト](https://ollama.ai/)からインストールしてください。
+
+**Linuxの場合:**
+```bash
+curl -fsSL https://ollama.ai/install.sh | sh
+```
+
+**Macの場合:**
+- https://ollama.ai/download からダウンロードしてインストール
+
+**Windowsの場合:**
+- https://ollama.ai/download からダウンロードしてインストール
+
+### 手順5: Ollamaの起動
+
+別のターミナルウィンドウで実行（常時起動が必要）：
+
+```bash
+ollama serve
+```
+
+※ このコマンドは実行したままにしておく必要があります
+
+### 手順6: AIモデルのダウンロード
+
+Ollamaが起動している状態で、別のターミナルで実行：
+
+```bash
+ollama pull gemma3:27b
+```
+
+他のモデルを使用する場合は、環境変数 `OLLAMA_MODEL` で指定できます。
+
+利用可能なモデル例：
+- `gemma3:27b`（デフォルト）
+- `llama3.2`
+- `mistral`
+- `qwen2.5`
+
+### 手順7: Mastodonアクセストークンの取得
+
+1. Mastodonインスタンスにログイン
+2. 設定 → 開発 → 新しいアプリケーション
+3. アプリケーション名を入力（例: Keibot）
+4. 必要な権限を選択：
+   - `read`
+   - `profile`
+   - `write:favourites`
+   - `write:statuses`
+   - `write:media`
+5. 「送信」をクリック
+6. 作成されたアプリケーションをクリックして詳細を開く
+7. 「アクセストークン」をコピー
+
+### 手順8: ディレクトリ作成
+
+```bash
+mkdir -p data
+```
+
+### 手順9: 環境変数の設定
 
 `.env.example` をコピーして `.env` を作成：
 
@@ -103,16 +202,44 @@ MASTODON_API_BASE_URL=https://your-mastodon-instance.com
 MASTODON_ACCESS_TOKEN=your-access-token-here
 
 # オプション
-OLLAMA_MODEL=gemma3:12b
+OLLAMA_MODEL=gemma3:27b
 KEIBOT_DATA_DIR=/path/to/data
 KEIBOT_VISIBILITY=follow  # public, unlisted, private, direct, follow
 ```
 
-### ボット起動
+### 手順10: ボットの起動
+
+仮想環境が有効化されていることを確認してから実行：
 
 ```bash
 python -m src.main
 ```
+
+ボットが正常に起動すると、Mastodonに起動メッセージが投稿されます。
+
+## 日常的な使用方法
+
+### ボットの起動手順
+
+1. 仮想環境を有効化：
+```bash
+source .venv/bin/activate  # Linux/Mac
+# または .venv\Scripts\activate  # Windows
+```
+
+2. Ollamaが起動していることを確認（別ターミナル）：
+```bash
+ollama serve
+```
+
+3. ボットを起動：
+```bash
+python -m src.main
+```
+
+### ボットの停止
+
+Ctrl+C でボットを停止できます。
 
 ### 会話データ確認
 
@@ -122,6 +249,9 @@ python view_data.py
 
 # 特定の会話詳細
 python view_data.py <conversation_id>
+
+# 最新の会話詳細
+python3 view_data.py latest
 ```
 
 ## 会話データ
