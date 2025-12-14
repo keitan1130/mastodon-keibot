@@ -141,13 +141,36 @@ curl -fsSL https://ollama.ai/install.sh | sh
 
 ### 手順5: Ollamaの起動
 
-別のターミナルウィンドウで実行（常時起動が必要）：
+**Mac/Windowsの場合**: GUIインストーラーを使用すると自動的にバックグラウンドで起動します。この手順はスキップできます。
+
+**Linuxの場合**: インストール後、まず自動起動を無効化してから手動で起動します。
 
 ```bash
+# 自動起動をオフにする
+sudo systemctl disable ollama
+sudo systemctl stop ollama
+
+# 手動でOllamaサーバーを起動（別ターミナル推奨）
 ollama serve
 ```
 
-※ このコマンドは実行したままにしておく必要があります
+※ `ollama serve` は実行したままにしておく必要があります
+
+Ollamaが起動しているか確認：
+```bash
+ollama list
+```
+エラーが出なければ起動しています。
+
+**（参考）自動起動したい場合:**
+```bash
+# systemdサービスとして有効化・起動
+sudo systemctl enable ollama
+sudo systemctl start ollama
+
+# 状態確認
+sudo systemctl status ollama
+```
 
 ### 手順6: AIモデルのダウンロード
 
@@ -228,10 +251,11 @@ source .venv/bin/activate  # Linux/Mac
 # または .venv\Scripts\activate  # Windows
 ```
 
-2. Ollamaが起動していることを確認（別ターミナル）：
+2. **Linuxの場合**: 別ターミナルでOllamaを起動：
 ```bash
 ollama serve
 ```
+※ Mac/Windowsで自動起動している場合はスキップ
 
 3. ボットを起動：
 ```bash
