@@ -164,6 +164,7 @@ ollama pull gemma3:27b
 - `llama3.2`
 - `mistral`
 - `qwen2.5`
+- `gemma3:270m`
 
 ### 手順7: Mastodonアクセストークンの取得
 
