@@ -106,7 +106,7 @@ cd mastodon-keibot
 
 ```bash
 # 仮想環境を作成
-python -m venv .venv
+python3 -m venv .venv
 
 # 仮想環境を有効化
 # Linux/Mac の場合:
@@ -236,7 +236,7 @@ KEIBOT_VISIBILITY=follow  # public, unlisted, private, direct, follow
 仮想環境が有効化されていることを確認してから実行：
 
 ```bash
-python -m src.main
+python3 -m src.main
 ```
 
 ボットが正常に起動すると、Mastodonに起動メッセージが投稿されます。
@@ -259,7 +259,7 @@ ollama serve
 
 3. ボットを起動：
 ```bash
-python -m src.main
+python3 -m src.main
 ```
 
 ### ボットの停止
@@ -270,10 +270,10 @@ Ctrl+C でボットを停止できます。
 
 ```bash
 # 全会話一覧
-python view_data.py
+python3 view_data.py
 
 # 特定の会話詳細
-python view_data.py <conversation_id>
+python3 view_data.py <conversation_id>
 
 # 最新の会話詳細
 python3 view_data.py latest
