@@ -270,7 +270,7 @@ Ctrl+C でボットを停止できます。
 
 ```bash
 # 全会話一覧
-python3 view_data.py
+python3 view_data.py list
 
 # 特定の会話詳細
 python3 view_data.py <conversation_id>
